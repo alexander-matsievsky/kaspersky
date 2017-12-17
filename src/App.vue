@@ -1,13 +1,26 @@
 <template>
   <div id="app">
-    <img src="./assets/logo.png">
     <router-view/>
   </div>
 </template>
 
 <script>
+  import 'normalize.css'
+  import { employees } from './data/employees'
+
   export default {
-    name: 'app'
+    name: 'app',
+    async created () {
+      employees.changes.subscribe(
+        console.log.bind(console),
+        console.error.bind(console)
+      )
+      try {
+        await employees.fetch('/static/dataset.json')
+      } catch (error) {
+        console.error(error)
+      }
+    }
   }
 </script>
 
@@ -16,8 +29,22 @@
     font-family: 'Avenir', Helvetica, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    text-align: center;
-    color: #2c3e50;
-    margin-top: 60px;
+  }
+
+  * {
+    border: 0;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html, body {
+    height: 100vh;
+    width: 100vw;
+  }
+
+  ul {
+    bottom: 0;
+    list-style: none;
   }
 </style>
