@@ -5,13 +5,13 @@ const state = subject.scan(([val], records) => {
   const changes = []
   for (const [id, record] of records) {
     if (!val.has(id)) {
-      changes.push({new_val: record, old_val: null})
+      changes.push({newVal: record, oldVal: null})
       val.set(id, record)
     } else if (record === null) {
-      changes.push({new_val: null, old_val: val.get(id)})
+      changes.push({newVal: null, oldVal: val.get(id)})
       val.delete(id)
     } else {
-      changes.push({new_val: record, old_val: val.get(id)})
+      changes.push({newVal: record, oldVal: val.get(id)})
       val.set(id, record)
     }
   }

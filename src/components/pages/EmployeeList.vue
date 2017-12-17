@@ -25,10 +25,16 @@
           <input type="checkbox" v-model="ordering.asc">
         </label>
       </div>
+      <label>
+        <span>Filtering</span>
+        <input type="search" v-model="filtering">
+        <span v-if="this.search">({{this.search.size}}/{{employees.length}})</span>
+      </label>
     </form>
     <ul :data-display="display">
       <li
         :data-even="getOrder(employee.id) % 2 === 0"
+        :data-excluded="getExcluded(employee.id)"
         :key="employee.id"
         :style="{order: getOrder(employee.id)}"
         class="employee"
@@ -55,6 +61,7 @@
 <script>
   import { employees } from '../../data/employees'
   import { order } from '../../data/order'
+  import { search } from '../../data/search'
 
   export default {
     name: 'EmployeeList',
@@ -65,19 +72,36 @@
       order.subscribe(order => {
         this.order = order
       })
+      search.val.subscribe(search => {
+        this.search = search
+        this.$forceUpdate()
+      })
+      if (this.$route.query.q) {
+        search.push(this.$route.query.q)
+      }
+    },
+    watch: {
+      filtering (term) {
+        search.push(term)
+      }
     },
     data () {
+      const {q = '', s = 'name'} = this.$route.query
       const {display = 'list'} = this.$route.params
       return {
         display,
         employees: [],
+        filtering: q,
         ordering: {
           asc: true,
-          prop: 'name'
+          prop: s
         }
       }
     },
     methods: {
+      getExcluded (id) {
+        return this.search ? !this.search.has(id) : false
+      },
       getOrder (id) {
         if (!this.order) return 0
         const order = this.order[this.ordering.prop]
@@ -96,6 +120,9 @@
     .employee {
       &[data-even=true] {
         background-color: ghostwhite;
+      }
+      &[data-excluded=true] {
+        display: none;
       }
       display: flex;
       flex-flow: row;
@@ -133,6 +160,9 @@
     flex-flow: row wrap;
     width: 100%;
     .employee {
+      &[data-excluded=true] {
+        display: none;
+      }
       align-items: center;
       border-radius: .1rem;
       box-shadow: 0 0 .1rem gray;
